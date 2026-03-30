@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}My Bookings - AutoRent{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card-modern p-4">
+        <h2 class="fw-bold mb-4"><i class="fas fa-calendar-alt me-2"></i>My Bookings</h2>
+        
+        {% if bookings %}
+            {% for booking in bookings %}
+            <div class="card mb-3 border-0 shadow-sm" data-aos="fade-up">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <h5 class="fw-bold">{{ booking.vehicle.name }}</h5>
+                            <p class="text-muted small">{{ booking.vehicle.model }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p class="mb-0"><i class="fas fa-calendar-alt me-2"></i>{{ booking.start_date }} to {{ booking.end_date }}</p>
+                            <p class="mb-0"><i class="fas fa-clock me-2"></i>{{ booking.total_days }} days</p>
+                        </div>
+                        <div class="col-md-2">
+                            <p class="fw-bold text-primary mb-0">${{ booking.total_price }}</p>
+                        </div>
+                        <div class="col-md-2">
+                            <span class="badge {% if booking.status == 'confirmed' %}bg-success{% elif booking.status == 'pending' %}bg-warning{% elif booking.status == 'cancelled' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                {{ booking.status|title }}
+                            </span>
+                            <br>
+                            <span class="badge {% if booking.payment_status == 'verified' %}bg-success{% elif booking.payment_status == 'payment_sent' %}bg-info{% elif booking.payment_status == 'pending' %}bg-warning{% else %}bg-secondary{% endif %} mt-1">
+                                {{ booking.get_payment_status_display }}
+                            </span>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="{% url 'booking_detail' booking.id %}" class="btn-sm btn-gradient">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                <h3>No Bookings Yet</h3>
+                <p class="text-muted">Start exploring vehicles and make your first booking!</p>
+                <a href="{% url 'vehicle_list' %}" class="btn-gradient">Browse Vehicles</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

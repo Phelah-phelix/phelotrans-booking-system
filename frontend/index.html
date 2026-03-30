@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RideSwift - Vehicle Booking System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <i class="fas fa-car"></i>
+                    <span>RideSwift</span>
+                </div>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="#home" class="active">Home</a></li>
+                    <li><a href="#vehicles">Vehicles</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <div class="nav-buttons" id="navButtons">
+                    <button class="btn-login" onclick="showLoginModal()">Login</button>
+                    <button class="btn-signup" onclick="showSignupModal()">Sign Up</button>
+                </div>
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="userName"></span>
+                    </div>
+                    <div class="dropdown-menu">
+                        <a href="#" onclick="showProfile()"><i class="fas fa-user"></i> Profile</a>
+                        <a href="#" onclick="showMyBookings()"><i class="fas fa-calendar-check"></i> My Bookings</a>
+                        <a href="#" onclick="showMyVehicles()" id="ownerVehiclesLink" style="display: none;"><i class="fas fa-car"></i> My Vehicles</a>
+                        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Your Journey, <span class="highlight">Our Wheels</span></h1>
+                    <p>Book your perfect ride in seconds. Choose from a wide range of vehicles for any occasion.</p>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <h3>500+</h3>
+                            <p>Vehicles</p>
+                        </div>
+                        <div class="stat">
+                            <h3>10K+</h3>
+                            <p>Happy Customers</p>
+                        </div>
+                        <div class="stat">
+                            <h3>24/7</h3>
+                            <p>Support</p>
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="scrollToVehicles()">Browse Vehicles <i class="fas fa-arrow-right"></i></button>
+                </div>
+                <div class="hero-image">
+                    <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=500&h=400&fit=crop" alt="Luxury Car">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vehicles Section -->
+    <section id="vehicles" class="vehicles">
+        <div class="container">
+            <div class="section-header">
+                <h2>Our Fleet</h2>
+                <p>Choose from our premium collection of vehicles</p>
+            </div>
+            
+            <!-- Filters -->
+            <div class="filters">
+                <div class="filter-group">
+                    <select id="vehicleType" onchange="filterVehicles()">
+                        <option value="">All Types</option>
+                        <option value="car">Cars</option>
+                        <option value="bike">Motorcycles</option>
+                        <option value="van">Vans</option>
+                        <option value="truck">Trucks</option>
+                        <option value="bus">Buses</option>
+                        <option value="aeroplane">Aeroplane</option>
+                        <option value="train">Train</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select id="fuelType" onchange="filterVehicles()">
+                        <option value="">All Fuel Types</option>
+                        <option value="petrol">Petrol</option>
+                        <option value="diesel">Diesel</option>
+                        <option value="electric">Electric</option>
+                        <option value="hybrid">Hybrid</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <input type="number" id="maxPrice" placeholder="Max Price per day" onchange="filterVehicles()">
+                </div>
+                <div class="filter-group">
+                    <input type="text" id="searchVehicle" placeholder="Search by brand/model" onkeyup="filterVehicles()">
+                </div>
+            </div>
+
+            <div class="vehicles-grid" id="vehiclesGrid">
+                <div class="loading">Loading vehicles...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2>How It Works</h2>
+                <p>Simple and easy booking process</p>
+            </div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>1. Choose Vehicle</h3>
+                    <p>Browse our collection and pick your perfect ride</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3>2. Select Dates</h3>
+                    <p>Choose pickup and return dates that suit you</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <h3>3. Make Payment</h3>
+                    <p>Secure payment with multiple options</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <h3>4. Get Your Keys</h3>
+                    <p>Pick up your vehicle and hit the road!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h2>Contact Us</h2>
+                    <p>Have questions? We're here to help!</p>
+                    <div class="info-item">
+                        <i class="fas fa-phone"></i>
+                        <span>+254110272019</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>phelixomondi788.com</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span> Main Street, Nairobi, NAI 10001</span>
+                    </div>
+                </div>
+                <form class="contact-form" id="contactForm">
+                    <input type="text" placeholder="Your Name" required>
+                    <input type="email" placeholder="Your Email" required>
+                    <textarea placeholder="Your Message" rows="5" required></textarea>
+                    <button type="submit" class="btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>RideSwift</h3>
+                    <p>Making travel easy and affordable for everyone.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#vehicles">Vehicles</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Follow Us</h4>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 RideSwift. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLoginModal()">&times;</span>
+            <h2>Login to RideSwift</h2>
+            <form id="loginForm">
+                <input type="text" id="loginUsername" placeholder="Username" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="signupModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeSignupModal()">&times;</span>
+            <h2>Create Account</h2>
+            <form id="signupForm">
+                <input type="text" id="signupUsername" placeholder="Username" required>
+                <input type="email" id="signupEmail" placeholder="Email" required>
+                <input type="password" id="signupPassword" placeholder="Password" required>
+                <select id="signupUserType">
+                    <option value="customer">Customer</option>
+                    <option value="owner">Vehicle Owner</option>
+                </select>
+                <button type="submit" class="btn-primary">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="bookingModal" class="modal">
+        <div class="modal-content booking-modal">
+            <span class="close" onclick="closeBookingModal()">&times;</span>
+            <h2>Book This Vehicle</h2>
+            <div id="bookingVehicleInfo"></div>
+            <form id="bookingForm">
+                <input type="date" id="startDate" required>
+                <input type="date" id="endDate" required>
+                <div id="priceCalculation"></div>
+                <button type="submit" class="btn-primary">Confirm Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="profileModal" class="modal">
+        <div class="modal-content profile-modal">
+            <span class="close" onclick="closeProfileModal()">&times;</span>
+            <h2>My Profile</h2>
+            <div id="profileContent"></div>
+        </div>
+    </div>
+
+    <div id="bookingsModal" class="modal">
+        <div class="modal-content bookings-modal">
+            <span class="close" onclick="closeBookingsModal()">&times;</span>
+            <h2>My Bookings</h2>
+            <div id="bookingsContent"></div>
+        </div>
+    </div>
+
+    <div id="myVehiclesModal" class="modal">
+        <div class="modal-content vehicles-modal">
+            <span class="close" onclick="closeMyVehiclesModal()">&times;</span>
+            <h2>My Vehicles</h2>
+            <button class="btn-secondary" onclick="showAddVehicleForm()">Add New Vehicle</button>
+            <div id="myVehiclesContent"></div>
+        </div>
+    </div>
+
+    <div id="addVehicleModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddVehicleModal()">&times;</span>
+            <h2>Add New Vehicle</h2>
+            <form id="addVehicleForm">
+                <input type="text" id="vehicleName" placeholder="Vehicle Name" required>
+                <input type="text" id="vehicleModel" placeholder="Model" required>
+                <input type="text" id="vehicleBrand" placeholder="Brand" required>
+                <select id="vehicleTypeSelect" required>
+                    <option value="car">Car</option>
+                    <option value="bike">Motorcycle</option>
+                    <option value="van">Van</option>
+                    <option value="truck">Truck</option>
+                    <option value="bus">Bus</option>
+                    <option value="aeroplane">Aeroplane</option>
+                    <option value="train">Train</option>
+                </select>
+                <select id="fuelTypeSelect" required>
+                    <option value="petrol">Petrol</option>
+                    <option value="diesel">Diesel</option>
+                    <option value="electric">Electric</option>
+                    <option value="hybrid">Hybrid</option>
+                </select>
+                <input type="text" id="licensePlate" placeholder="License Plate" required>
+                <input type="number" id="seatingCapacity" placeholder="Seating Capacity" required>
+                <input type="number" id="pricePerDay" placeholder="Price per Day ($)" required>
+                <textarea id="vehicleDescription" placeholder="Description" rows="3"></textarea>
+                <button type="submit" class="btn-primary">Add Vehicle</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

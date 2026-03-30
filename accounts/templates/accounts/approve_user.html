@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Review User: {{ user.username }}</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Phone:</strong> {{ user.phone|default:"Not provided" }}</p>
+                    <p><strong>Address:</strong> {{ user.address|default:"Not provided" }}</p>
+                    <p><strong>Registered:</strong> {{ user.created_at|date:"M d, Y H:i" }}</p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message to User:</label>
+                            <textarea class="form-control" id="message" name="message" rows="3"></textarea>
+                            <small class="text-muted">This message will be shown to the user</small>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" name="action" value="approve" class="btn btn-success">
+                                Approve User
+                            </button>
+                            <button type="submit" name="action" value="reject" class="btn btn-danger">
+                                Reject User
+                            </button>
+                            <a href="{% url 'pending_users' %}" class="btn btn-secondary">Back</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

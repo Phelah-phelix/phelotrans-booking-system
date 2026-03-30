@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Booking System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin: 0;
+            color: #667eea;
+        }
+        .api-info {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .endpoint {
+            background: #f4f4f4;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+            font-family: monospace;
+        }
+        .method {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .get { background: #61affe; color: white; }
+        .post { background: #49cc90; color: white; }
+        .put { background: #fca130; color: white; }
+        .delete { background: #f93e3e; color: white; }
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: white;
+        }
+        a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚗 Vehicle Booking System</h1>
+            <p>Your one-stop solution for vehicle rentals</p>
+        </header>
+        
+        <div class="api-info">
+            <h2>API Endpoints</h2>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/api/accounts/register/</strong> - Register new user
+            </div>
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <strong>/api/accounts/login/</strong> - Login user
+            </div>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="method put">PUT</span>
+                <strong>/api/accounts/profile/</strong> - View/Update profile
+            </div>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="method post">POST</span>
+                <strong>/api/vehicles/</strong> - List/Create vehicles
+            </div>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="method put">PUT</span>
+                <span class="method delete">DELETE</span>
+                <strong>/api/vehicles/{id}/</strong> - Vehicle details
+            </div>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="method post">POST</span>
+                <strong>/api/bookings/</strong> - List/Create bookings
+            </div>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="method put">PUT</span>
+                <span class="method delete">DELETE</span>
+                <strong>/api/bookings/{id}/</strong> - Booking details
+            </div>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <strong>/admin/</strong> - Admin panel
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 Phelix. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Book {{ vehicle.name }} - AutoRent{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8" data-aos="fade-up">
+            <div class="card-modern p-4">
+                <h2 class="fw-bold mb-4">Book {{ vehicle.name }}</h2>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded-3">
+                            <h5>Vehicle Details</h5>
+                            <p><strong>Model:</strong> {{ vehicle.model }} ({{ vehicle.year }})</p>
+                            <p><strong>Transmission:</strong> {{ vehicle.transmission }}</p>
+                            <p><strong>Seats:</strong> {{ vehicle.seats }}</p>
+                            <p><strong>Price per day:</strong> ${{ vehicle.price_per_day }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded-3">
+                            <h5>Booking Information</h5>
+                            <p><i class="fas fa-info-circle text-primary me-2"></i>Select your rental dates</p>
+                            <p><i class="fas fa-clock text-primary me-2"></i>Minimum rental: 1 day</p>
+                            <p><i class="fas fa-shield-alt text-primary me-2"></i>Free cancellation up to 24 hours</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Start Date</label>
+                            <input type="date" class="form-control" name="start_date" 
+                                   min="{% now 'Y-m-d' %}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">End Date</label>
+                            <input type="date" class="form-control" name="end_date" 
+                                   min="{% now 'Y-m-d' %}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Special Requests (Optional)</label>
+                        <textarea class="form-control" name="special_requests" rows="3" 
+                                  placeholder="Any special requests or requirements?"></textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn-gradient">
+                            <i class="fas fa-check-circle me-2"></i>Proceed to Payment
+                        </button>
+                        <a href="{% url 'vehicle_detail' vehicle.id %}" class="btn-outline-gradient text-center">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Vehicle
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

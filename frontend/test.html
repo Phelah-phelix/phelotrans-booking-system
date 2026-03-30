@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test - Port 8001</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        button { margin: 10px; padding: 10px 20px; cursor: pointer; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>API Test on Port 8001</h1>
+    
+    <h2>Test Registration</h2>
+    <button onclick="testRegister()">Create Test User</button>
+    <div id="registerResult"></div>
+    
+    <h2>Test Login</h2>
+    <input type="text" id="loginUsername" placeholder="Username" value="testuser">
+    <input type="password" id="loginPassword" placeholder="Password" value="testpass123">
+    <button onclick="testLogin()">Login</button>
+    <div id="loginResult"></div>
+    
+    <h2>Test Get Vehicles</h2>
+    <button onclick="testGetVehicles()">Get Vehicles</button>
+    <div id="vehiclesResult"></div>
+    
+    <script>
+        const API_URL = '/api';
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        async function testRegister() {
+            const resultDiv = document.getElementById('registerResult');
+            resultDiv.innerHTML = '<p>Testing registration...</p>';
+            
+            const username = 'user_' + Date.now();
+            const data = {
+                username: username,
+                email: username + '@example.com',
+                password: 'testpass123',
+                first_name: 'Test',
+                last_name: 'User',
+                user_type: 'customer'
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/accounts/register/`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<pre class="success">✅ SUCCESS:\n${JSON.stringify(result, null, 2)}</pre>`;
+                    if (result.token) {
+                        localStorage.setItem('test_token', result.token);
+                        resultDiv.innerHTML += `<p class="success">Token saved: ${result.token.substring(0, 20)}...</p>`;
+                    }
+                } else {
+                    resultDiv.innerHTML = `<pre class="error">❌ ERROR (${response.status}):\n${JSON.stringify(result, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<pre class="error">❌ NETWORK ERROR: ${error.message}</pre>`;
+            }
+        }
+        
+        async function testLogin() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const resultDiv = document.getElementById('loginResult');
+            
+            resultDiv.innerHTML = '<p>Testing login...</p>';
+            
+            try {
+                const response = await fetch(`${API_URL}/accounts/login/`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.token) {
+                    resultDiv.innerHTML = `<pre class="success">✅ LOGIN SUCCESSFUL:\n${JSON.stringify(result, null, 2)}</pre>`;
+                    localStorage.setItem('auth_token', result.token);
+                    resultDiv.innerHTML += `<p class="success">Token saved: ${result.token.substring(0, 20)}...</p>`;
+                } else {
+                    resultDiv.innerHTML = `<pre class="error">❌ LOGIN FAILED (${response.status}):\n${JSON.stringify(result, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<pre class="error">❌ NETWORK ERROR: ${error.message}</pre>`;
+            }
+        }
+        
+        async function testGetVehicles() {
+            const resultDiv = document.getElementById('vehiclesResult');
+            resultDiv.innerHTML = '<p>Loading vehicles...</p>';
+            
+            try {
+                const response = await fetch(`${API_URL}/vehicles/`, {
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<pre class="success">✅ VEHICLES (${result.length} found):\n${JSON.stringify(result, null, 2)}</pre>`;
+                } else {
+                    resultDiv.innerHTML = `<pre class="error">❌ ERROR: ${JSON.stringify(result, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<pre class="error">❌ NETWORK ERROR: ${error.message}</pre>`;
+            }
+        }
+    </script>
+</body>
+</html>

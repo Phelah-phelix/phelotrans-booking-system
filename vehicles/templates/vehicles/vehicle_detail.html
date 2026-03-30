@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ vehicle.name }} - AutoRent{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-7" data-aos="fade-right">
+            {% if vehicle.main_image %}
+            <img src="{{ vehicle.main_image.url }}" class="img-fluid rounded-4 shadow-lg" alt="{{ vehicle.name }}">
+            {% else %}
+            <div class="bg-light text-center py-5 rounded-4">
+                <i class="fas fa-car fa-5x text-muted"></i>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-md-5" data-aos="fade-left">
+            <div class="card-modern p-4">
+                <h1 class="fw-bold mb-2">{{ vehicle.name }}</h1>
+                <p class="text-muted mb-3">{{ vehicle.model }} ({{ vehicle.year }})</p>
+                
+                <div class="row mb-4">
+                    <div class="col-4">
+                        <div class="text-center">
+                            <i class="fas fa-cog fa-2x text-primary"></i>
+                            <p class="mb-0 small">{{ vehicle.transmission }}</p>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-center">
+                            <i class="fas fa-gas-pump fa-2x text-primary"></i>
+                            <p class="mb-0 small">{{ vehicle.fuel_type }}</p>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-center">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                            <p class="mb-0 small">{{ vehicle.seats }} seats</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h3 class="text-primary fw-bold">Ksh{{ vehicle.price_per_day }}</h3>
+                    <p class="text-muted">per day</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h5>Description</h5>
+                    <p class="text-muted">{{ vehicle.description }}</p>
+                </div>
+                
+                {% if vehicle.features %}
+                <div class="mb-4">
+                    <h5>Features</h5>
+                    <ul class="list-unstyled">
+                        {% for feature in vehicle.get_features_list %}
+                        <li><i class="fas fa-check-circle text-success me-2"></i>{{ feature }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                {% if user.is_authenticated %}
+                    {% if user.status == 'approved' %}
+                        <a href="{% url 'create_booking' vehicle.id %}" class="btn-gradient w-100">
+                            <i class="fas fa-calendar-check me-2"></i>Book Now
+                        </a>
+                    {% elif user.status == 'pending' %}
+                        <div class="alert alert-warning">
+                            Your account is pending approval. You can book once approved.
+                        </div>
+                    {% elif user.status == 'rejected' %}
+                        <div class="alert alert-danger">
+                            Your account was rejected. Contact support for assistance.
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn-gradient w-100">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login to Book
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

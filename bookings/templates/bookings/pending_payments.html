@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Payments - AutoRent Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card-modern p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">
+                    <i class="fas fa-clock text-warning me-2"></i>Pending Payments
+                </h2>
+                <p class="text-muted mt-2">Verify and confirm customer payments</p>
+                <p class="text-muted"><strong>Payment Number: 0110272019</strong></p>
+            </div>
+            <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                <i class="fas fa-money-bill-wave fa-2x text-warning"></i>
+            </div>
+        </div>
+        
+        {% if pending_bookings %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Customer</th>
+                            <th>Vehicle</th>
+                            <th>Amount</th>
+                            <th>Payment Phone</th>
+                            <th>Payment Code</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in pending_bookings %}
+                        <tr>
+                            <td><strong>#{{ booking.id }}</strong></td>
+                            <td>{{ booking.user.email }}</td>
+                            <td>{{ booking.vehicle.name }}</td>
+                            <td class="text-success fw-bold">Ksh{{ booking.total_price }}</td>
+                            <td>{{ booking.payment_phone }}</td>
+                            <td><code>{{ booking.payment_code }}</code></td>
+                            <td>{{ booking.updated_at|date:"M d, H:i" }}</td>
+                            <td>
+                                <a href="{% url 'verify_payment' booking.id %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-check-circle me-1"></i>Verify
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                <h3>No Pending Payments</h3>
+                <p class="text-muted">All payments have been processed.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    code {
+        background: #f8f9fa;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
