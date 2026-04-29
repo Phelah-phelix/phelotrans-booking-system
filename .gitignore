@@ -67,3 +67,8 @@ media/
 *.bak
 *.backup
 *.sqlite3
+# Production
+staticfiles/
+media/
+*.log
+*.sqlite3
