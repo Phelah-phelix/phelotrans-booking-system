@@ -1,26 +1,65 @@
 {% extends 'base.html' %}
+
+{% block title %}Approve Password Reset - Admin{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card">
+            <div class="card shadow">
                 <div class="card-header bg-primary text-white">
-                    <h3>Approve Password Reset</h3>
+                    <h3 class="mb-0">
+                        <i class="fas fa-key me-2"></i>Approve Password Reset
+                    </h3>
                 </div>
                 <div class="card-body">
-                    <p><strong>User:</strong> {{ user.email }}</p>
+                    <div class="alert alert-info">
+                        <strong>User Details:</strong><br>
+                        <strong>Username:</strong> {{ user.username }}<br>
+                        <strong>Email:</strong> {{ user.email }}<br>
+                        <strong>Request Date:</strong> {{ user.updated_at|date:"M d, Y H:i" }}
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <strong>Reset Token:</strong><br>
+                        <code>{{ user.admin_message|cut:"RESET_TOKEN:" }}</code>
+                    </div>
+                    
                     <form method="post">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <label>New Password</label>
+                            <label class="form-label">New Password</label>
                             <input type="password" name="new_password" class="form-control" required>
+                            <small class="text-muted">Enter a new password for this user</small>
                         </div>
-                        <button type="submit" class="btn btn-success">Approve & Reset Password</button>
-                        <a href="{% url 'pending_password_resets' %}" class="btn btn-secondary">Cancel</a>
+                        <div class="mb-3">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" name="confirm_password" class="form-control" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-2"></i>Approve & Reset Password
+                            </button>
+                            <a href="{% url 'pending_password_resets' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Pending Requests
+                            </a>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    const password = document.querySelector('[name="new_password"]').value;
+    const confirm = document.querySelector('[name="confirm_password"]').value;
+    
+    if (password !== confirm) {
+        e.preventDefault();
+        alert('Passwords do not match!');
+    }
+});
+</script>
 {% endblock %}

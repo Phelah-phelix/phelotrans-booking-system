@@ -12,26 +12,13 @@
         color: white;
         margin-bottom: 20px;
         transition: transform 0.3s ease;
+        position: relative;
+        overflow: hidden;
     }
-    .stat-card:hover {
-        transform: translateY(-5px);
-    }
-    .stat-number {
-        font-size: 2.5rem;
-        font-weight: bold;
-        margin-bottom: 5px;
-    }
-    .stat-label {
-        font-size: 0.9rem;
-        opacity: 0.9;
-    }
-    .stat-icon {
-        font-size: 3rem;
-        opacity: 0.3;
-        position: absolute;
-        right: 20px;
-        top: 20px;
-    }
+    .stat-card:hover { transform: translateY(-5px); }
+    .stat-number { font-size: 2.5rem; font-weight: bold; margin-bottom: 5px; }
+    .stat-label { font-size: 0.9rem; opacity: 0.9; }
+    .stat-icon { font-size: 3rem; opacity: 0.3; position: absolute; right: 20px; top: 20px; }
     .quick-action-card {
         background: white;
         border-radius: 15px;
@@ -40,38 +27,27 @@
         transition: all 0.3s ease;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         margin-bottom: 20px;
+        cursor: pointer;
+        height: 100%;
     }
-    .quick-action-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    }
-    .quick-action-icon {
-        font-size: 2.5rem;
-        color: #667eea;
-        margin-bottom: 15px;
-    }
+    .quick-action-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+    .quick-action-icon { font-size: 2.5rem; color: #667eea; margin-bottom: 15px; }
     .recent-activity {
         background: white;
         border-radius: 15px;
         padding: 20px;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
     }
-    .activity-item {
-        padding: 15px;
-        border-bottom: 1px solid #eee;
-        transition: background 0.3s ease;
-    }
-    .activity-item:hover {
-        background: #f8f9fa;
-    }
-    .badge-pending {
-        background: #ffc107;
-        color: #000;
-    }
-    .badge-approved {
-        background: #28a745;
-        color: #fff;
-    }
+    .activity-item { padding: 15px; border-bottom: 1px solid #eee; transition: background 0.3s ease; }
+    .activity-item:hover { background: #f8f9fa; }
+    .badge-pending { background: #ffc107; color: #000; }
+    .badge-approved { background: #28a745; color: #fff; }
+    .badge-rejected { background: #dc3545; color: #fff; }
+    .badge-verified { background: #28a745; color: #fff; }
+    .section-title { margin-top: 30px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #667eea; }
+    .btn-reset { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+    .btn-reset:hover { transform: translateY(-2px); color: white; }
 </style>
 
 <div class="container-fluid mt-4">
@@ -79,11 +55,9 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="stat-card position-relative">
-                <div class="stat-icon">
-                    <i class="fas fa-user-shield"></i>
-                </div>
-                <h2 class="mb-2">Welcome back, {{ user.username }}!</h2>
-                <p class="mb-0">Here's what's happening with your vehicle booking platform today.Amazing things are with us..!!!</p>
+                <div class="stat-icon"><i class="fas fa-user-shield"></i></div>
+                <h2 class="mb-2">Welcome back, Admin {{ user.username }}!</h2>
+                <p class="mb-0">Manage your vehicle booking platform from this central dashboard.</p>
             </div>
         </div>
     </div>
@@ -120,135 +94,204 @@
         </div>
     </div>
 
-    <!-- Quick Actions -->
+    <!-- Quick Actions - ALL IN ONE ROW -->
     <div class="row mb-4">
         <div class="col-12">
-            <h3 class="mb-3">Quick Actions</h3>
+            <h3 class="section-title">Quick Actions</h3>
         </div>
+        
+        <!-- Card 1: Approve Users -->
         <div class="col-md-3">
             <a href="{% url 'pending_users' %}" class="text-decoration-none">
                 <div class="quick-action-card">
-                    <div class="quick-action-icon">
-                        <i class="fas fa-user-check"></i>
-                    </div>
+                    <div class="quick-action-icon"><i class="fas fa-user-check"></i></div>
                     <h5>Approve Users</h5>
                     <p class="text-muted small">Review pending registrations</p>
+                    <span class="badge bg-warning" id="pendingUsersBadge">0</span>
                 </div>
             </a>
         </div>
+        
+        <!-- Card 2: Verify Payments -->
         <div class="col-md-3">
             <a href="{% url 'pending_payments' %}" class="text-decoration-none">
                 <div class="quick-action-card">
-                    <div class="quick-action-icon">
-                        <i class="fas fa-money-bill-wave"></i>
-                    </div>
+                    <div class="quick-action-icon"><i class="fas fa-money-bill-wave"></i></div>
                     <h5>Verify Payments</h5>
                     <p class="text-muted small">Check pending transactions</p>
+                    <span class="badge bg-info" id="pendingPaymentsBadge">0</span>
                 </div>
             </a>
         </div>
+        
+        <!-- Card 3: PASSWORD RESETS - FIXED AND VISIBLE -->
+        <div class="col-md-3">
+            <a href="{% url 'pending_password_resets' %}" class="text-decoration-none">
+                <div class="quick-action-card" style="border: 2px solid #f5576c;">
+                    <div class="quick-action-icon" style="color: #f5576c;"><i class="fas fa-key"></i></div>
+                    <h5 style="color: #f5576c;">Password Resets</h5>
+                    <p class="text-muted small">Approve reset requests</p>
+                    <span class="badge bg-danger" id="pendingResetsBadge">0</span>
+                </div>
+            </a>
+        </div>
+        
+        <!-- Card 4: Manage Vehicles -->
         <div class="col-md-3">
             <a href="/admin/vehicles/vehicle/" class="text-decoration-none">
                 <div class="quick-action-card">
-                    <div class="quick-action-icon">
-                        <i class="fas fa-car"></i>
-                    </div>
+                    <div class="quick-action-icon"><i class="fas fa-car"></i></div>
                     <h5>Manage Vehicles</h5>
                     <p class="text-muted small">Add or update vehicles</p>
                 </div>
             </a>
         </div>
+    </div>
+
+    <!-- Second Row of Quick Actions -->
+    <div class="row mb-4">
         <div class="col-md-3">
             <a href="{% url 'vehicle_list' %}" class="text-decoration-none">
                 <div class="quick-action-card">
-                    <div class="quick-action-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
+                    <div class="quick-action-icon"><i class="fas fa-search"></i></div>
                     <h5>Browse Site</h5>
                     <p class="text-muted small">View as customer</p>
                 </div>
             </a>
         </div>
+        <div class="col-md-3">
+            <a href="/admin/bookings/booking/" class="text-decoration-none">
+                <div class="quick-action-card">
+                    <div class="quick-action-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <h5>All Bookings</h5>
+                    <p class="text-muted small">View all bookings</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="/admin/accounts/user/" class="text-decoration-none">
+                <div class="quick-action-card">
+                    <div class="quick-action-icon"><i class="fas fa-users-cog"></i></div>
+                    <h5>All Users</h5>
+                    <p class="text-muted small">Manage all users</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="/admin/vehicles/vehiclecategory/" class="text-decoration-none">
+                <div class="quick-action-card">
+                    <div class="quick-action-icon"><i class="fas fa-tags"></i></div>
+                    <h5>Categories</h5>
+                    <p class="text-muted small">Manage categories</p>
+                </div>
+            </a>
+        </div>
     </div>
 
-    <!-- Recent Activity -->
+    <!-- Recent Activity Section -->
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="recent-activity">
-                <h5 class="mb-3"><i class="fas fa-users me-2"></i>Recent User Registrations</h5>
-                <div id="recentUsers">
-                    <p class="text-muted text-center">Loading...</p>
-                </div>
+                <h5 class="mb-3"><i class="fas fa-users me-2"></i>Recent Users</h5>
+                <div id="recentUsers"><p class="text-muted text-center">Loading...</p></div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="recent-activity">
                 <h5 class="mb-3"><i class="fas fa-shopping-cart me-2"></i>Recent Bookings</h5>
-                <div id="recentBookings">
-                    <p class="text-muted text-center">Loading...</p>
-                </div>
+                <div id="recentBookings"><p class="text-muted text-center">Loading...</p></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="recent-activity">
+                <h5 class="mb-3"><i class="fas fa-key me-2"></i>Reset Requests</h5>
+                <div id="recentResets"><p class="text-muted text-center">Loading...</p></div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Load dashboard statistics
-    fetch('/api/dashboard-stats/')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('totalUsers').innerText = data.total_users;
-            document.getElementById('pendingUsers').innerText = data.pending_users;
-            document.getElementById('totalBookings').innerText = data.total_bookings;
-            document.getElementById('totalRevenue').innerText = 'KSh ' + data.total_revenue;
-        });
+    function loadStats() {
+        fetch('/api/dashboard-stats/')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('totalUsers').innerText = data.total_users;
+                document.getElementById('pendingUsers').innerText = data.pending_users;
+                document.getElementById('totalBookings').innerText = data.total_bookings;
+                document.getElementById('totalRevenue').innerText = 'KSh ' + data.total_revenue;
+                document.getElementById('pendingUsersBadge').innerText = data.pending_users;
+            }).catch(error => console.error('Error:', error));
+    }
 
-    // Load recent users
-    fetch('/api/recent-users/')
-        .then(response => response.json())
-        .then(data => {
-            const container = document.getElementById('recentUsers');
-            if (data.users && data.users.length > 0) {
-                container.innerHTML = data.users.map(user => `
-                    <div class="activity-item">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>${user.username}</strong><br>
-                                <small class="text-muted">${user.email}</small>
-                            </div>
-                            <span class="badge ${user.status === 'approved' ? 'badge-approved' : 'badge-pending'}">${user.status}</span>
-                        </div>
-                        <small class="text-muted">Joined: ${user.created_at}</small>
-                    </div>
-                `).join('');
-            } else {
-                container.innerHTML = '<p class="text-muted text-center">No recent registrations</p>';
-            }
-        });
-
-    // Load recent bookings
-    fetch('/api/recent-bookings/')
-        .then(response => response.json())
-        .then(data => {
-            const container = document.getElementById('recentBookings');
-            if (data.bookings && data.bookings.length > 0) {
-                container.innerHTML = data.bookings.map(booking => `
-                    <div class="activity-item">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>${booking.vehicle_name}</strong><br>
-                                <small class="text-muted">${booking.user_email}</small>
-                            </div>
-                            <div class="text-end">
-                                <small class="text-success fw-bold">KSh ${booking.total_price}</small><br>
-                                <small class="text-muted">${booking.start_date} to ${booking.end_date}</small>
+    function loadRecentUsers() {
+        fetch('/api/recent-users/')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('recentUsers');
+                if (data.users && data.users.length > 0) {
+                    container.innerHTML = data.users.map(user => `
+                        <div class="activity-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div><strong>${user.username}</strong><br><small>${user.email}</small></div>
+                                <span class="badge ${user.status === 'approved' ? 'badge-approved' : 'badge-pending'}">${user.status}</span>
                             </div>
                         </div>
-                    </div>
-                `).join('');
-            } else {
-                container.innerHTML = '<p class="text-muted text-center">No recent bookings</p>';
-            }
-        });
+                    `).join('');
+                } else { container.innerHTML = '<p class="text-center text-muted">No recent users</p>'; }
+            }).catch(error => console.error('Error:', error));
+    }
+
+    function loadRecentBookings() {
+        fetch('/api/recent-bookings/')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('recentBookings');
+                if (data.bookings && data.bookings.length > 0) {
+                    container.innerHTML = data.bookings.map(booking => `
+                        <div class="activity-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div><strong>${booking.vehicle_name}</strong><br><small>${booking.user_email}</small></div>
+                                <span class="text-success fw-bold">KSh ${booking.total_price}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else { container.innerHTML = '<p class="text-center text-muted">No recent bookings</p>'; }
+            }).catch(error => console.error('Error:', error));
+    }
+
+    function loadResetRequests() {
+        fetch('/api/pending-resets-count/')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('pendingResetsBadge').innerText = data.count;
+                const container = document.getElementById('recentResets');
+                if (data.count > 0) {
+                    container.innerHTML = `
+                        <div class="activity-item text-center">
+                            <i class="fas fa-key fa-2x text-warning mb-2"></i>
+                            <p><strong>${data.count}</strong> pending password reset request(s)</p>
+                            <a href="{% url 'pending_password_resets' %}" class="btn btn-sm btn-primary">View Requests</a>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = '<p class="text-center text-muted">No pending reset requests</p>';
+                }
+            }).catch(error => console.error('Error:', error));
+    }
+
+    function loadPendingPaymentsCount() {
+        fetch('/api/pending-payments-count/')
+            .then(response => response.json())
+            .then(data => { document.getElementById('pendingPaymentsBadge').innerText = data.count; })
+            .catch(error => console.error('Error:', error));
+    }
+
+    loadStats();
+    loadRecentUsers();
+    loadRecentBookings();
+    loadResetRequests();
+    loadPendingPaymentsCount();
+    setInterval(() => { loadStats(); loadResetRequests(); loadPendingPaymentsCount(); }, 30000);
 </script>
 {% endblock %}

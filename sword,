@@ -1,0 +1,5 @@
+       email       | username | is_superuser | is_staff 
+-------------------+----------+--------------+----------
+ ochieng@gmail.com | Ochieng  | f            | f
+(1 row)
+
