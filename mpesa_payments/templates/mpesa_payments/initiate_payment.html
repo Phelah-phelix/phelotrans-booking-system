@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card-modern p-4">
+                <div class="text-center mb-4">
+                    <i class="fas fa-mobile-alt fa-3x text-primary"></i>
+                    <h2 class="fw-bold mt-3">M-Pesa Payment</h2>
+                    <p class="text-muted">Booking #{{ booking.id }}</p>
+                </div>
+                
+                <div class="alert alert-info mb-4">
+                    <p><strong>Amount:</strong> KSh {{ booking.total_price }}</p>
+                    <p><strong>Vehicle:</strong> {{ booking.vehicle.name }}</p>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label">M-Pesa Phone Number</label>
+                        <input type="tel" class="form-control" name="phone_number" placeholder="0712345678" required>
+                    </div>
+                    <button type="submit" class="btn-gradient w-100">Send STK Push</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - AutoRent{% endblock %}
+
+{% block content %}
+<style>
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 25px;
+        color: white;
+        margin-bottom: 20px;
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    .stat-icon {
+        font-size: 3rem;
+        opacity: 0.3;
+        position: absolute;
+        right: 20px;
+        top: 20px;
+    }
+    .quick-action-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .quick-action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    .quick-action-icon {
+        font-size: 2.5rem;
+        color: #667eea;
+        margin-bottom: 15px;
+    }
+    .recent-activity {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .activity-item {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        transition: background 0.3s ease;
+    }
+    .activity-item:hover {
+        background: #f8f9fa;
+    }
+    .badge-pending {
+        background: #ffc107;
+        color: #000;
+    }
+    .badge-approved {
+        background: #28a745;
+        color: #fff;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="stat-card position-relative">
+                <div class="stat-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h2 class="mb-2">Welcome back, {{ user.username }}!</h2>
+                <p class="mb-0">Here's what's happening with your vehicle booking platform today.Amazing things are with us..!!!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="stat-number" id="totalUsers">0</div>
+                <div class="stat-label">Total Users</div>
+                <i class="fas fa-users stat-icon"></i>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="stat-number" id="pendingUsers">0</div>
+                <div class="stat-label">Pending Approvals</div>
+                <i class="fas fa-user-clock stat-icon"></i>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="stat-number" id="totalBookings">0</div>
+                <div class="stat-label">Total Bookings</div>
+                <i class="fas fa-calendar-check stat-icon"></i>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="stat-number" id="totalRevenue">KSh 0</div>
+                <div class="stat-label">Total Revenue</div>
+                <i class="fas fa-chart-line stat-icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="mb-3">Quick Actions</h3>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'pending_users' %}" class="text-decoration-none">
+                <div class="quick-action-card">
+                    <div class="quick-action-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <h5>Approve Users</h5>
+                    <p class="text-muted small">Review pending registrations</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'pending_payments' %}" class="text-decoration-none">
+                <div class="quick-action-card">
+                    <div class="quick-action-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <h5>Verify Payments</h5>
+                    <p class="text-muted small">Check pending transactions</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="/admin/vehicles/vehicle/" class="text-decoration-none">
+                <div class="quick-action-card">
+                    <div class="quick-action-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <h5>Manage Vehicles</h5>
+                    <p class="text-muted small">Add or update vehicles</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'vehicle_list' %}" class="text-decoration-none">
+                <div class="quick-action-card">
+                    <div class="quick-action-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h5>Browse Site</h5>
+                    <p class="text-muted small">View as customer</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="recent-activity">
+                <h5 class="mb-3"><i class="fas fa-users me-2"></i>Recent User Registrations</h5>
+                <div id="recentUsers">
+                    <p class="text-muted text-center">Loading...</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="recent-activity">
+                <h5 class="mb-3"><i class="fas fa-shopping-cart me-2"></i>Recent Bookings</h5>
+                <div id="recentBookings">
+                    <p class="text-muted text-center">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Load dashboard statistics
+    fetch('/api/dashboard-stats/')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('totalUsers').innerText = data.total_users;
+            document.getElementById('pendingUsers').innerText = data.pending_users;
+            document.getElementById('totalBookings').innerText = data.total_bookings;
+            document.getElementById('totalRevenue').innerText = 'KSh ' + data.total_revenue;
+        });
+
+    // Load recent users
+    fetch('/api/recent-users/')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('recentUsers');
+            if (data.users && data.users.length > 0) {
+                container.innerHTML = data.users.map(user => `
+                    <div class="activity-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>${user.username}</strong><br>
+                                <small class="text-muted">${user.email}</small>
+                            </div>
+                            <span class="badge ${user.status === 'approved' ? 'badge-approved' : 'badge-pending'}">${user.status}</span>
+                        </div>
+                        <small class="text-muted">Joined: ${user.created_at}</small>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<p class="text-muted text-center">No recent registrations</p>';
+            }
+        });
+
+    // Load recent bookings
+    fetch('/api/recent-bookings/')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('recentBookings');
+            if (data.bookings && data.bookings.length > 0) {
+                container.innerHTML = data.bookings.map(booking => `
+                    <div class="activity-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>${booking.vehicle_name}</strong><br>
+                                <small class="text-muted">${booking.user_email}</small>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-success fw-bold">KSh ${booking.total_price}</small><br>
+                                <small class="text-muted">${booking.start_date} to ${booking.end_date}</small>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<p class="text-muted text-center">No recent bookings</p>';
+            }
+        });
+</script>
+{% endblock %}

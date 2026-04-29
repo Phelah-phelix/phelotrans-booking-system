@@ -40,6 +40,7 @@ class Vehicle(models.Model):
     main_image = models.ImageField(upload_to='vehicles/', null=True, blank=True)
     is_available = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
+    quantity_available = models.IntegerField(default=1, help_text="Number of vehicles available")
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header bg-warning">
+            <h3>Pending Password Reset Requests</h3>
+        </div>
+        <div class="card-body">
+            {% if users %}
+                {% for user in users %}
+                <div class="border p-3 mb-3 rounded">
+                    <p><strong>User:</strong> {{ user.email }}</p>
+                    <p><strong>Reset Token:</strong> <code>{{ user.admin_message|cut:"RESET_TOKEN:" }}</code></p>
+                    <a href="{% url 'approve_password_reset' user.id %}" class="btn btn-primary">Approve Reset</a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No pending password reset requests.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

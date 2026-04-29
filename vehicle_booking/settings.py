@@ -22,13 +22,23 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'django_daraja',
     
     # Local apps
     'core',
     'vehicles',
     'bookings',
     'accounts',
+    'mpesa_payments'
 ]
+MPESA_CONFIG = {
+    'CONSUMER_KEY': 'tNvw4ApdlXlm5CmOQ630qg2G60QuCaLSODAboYj2vyUv8YQx',
+    'CONSUMER_SECRET': 'PkE3luXsA1siCqR7YAbs2CGOI2EcvtkFof5VIfY99i8LBqDugsMvI7pIrTD6XpZo',
+    'SHORTCODE': '174379',  # Safaricom test shortcode
+    'PASSKEY': 'j/ftkooq6TQ5iTINDamwXeMrfxkl0qBZN+R8ynD5COhX63sAQ+op4tA6P5Wqkos9OeZGgyDIYFO3aMrGB/u+WgjbnJWtBPBFO89Iw5cyjOuq9Lnv6N/4RxpU1V1dt7Hl0s+qQjktJ0Y3kvDboMKE7mG/8Is/18+Ew/k+lrOmbx4OeE2YDKCLsvhVG7uS4AVPCyfx8tCGOic5dbmIgDBVtKRDG9Lt+4FCWFgjBFXwn0R2+B7KZS5TQRElGTLU4a71LBbdxQ2DPN/Jot8kl5NRgOr2jmIsPrJHdagmbdMhA6/xosNOrWuDYrGKVFrhgcs4bzCTHaJHr8PmXVJRXC6QPg==',
+    'CALLBACK_URL': 'https://127.0.0.1.8000/mpesa/callback/',  # Use ngrok in development
+    'ENVIRONMENT': 'sandbox',  # 'sandbox' or 'production'
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

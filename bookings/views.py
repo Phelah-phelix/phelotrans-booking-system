@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.utils import timezone
@@ -14,7 +15,6 @@ def is_admin(user):
 def create_booking(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle, id=vehicle_id, is_available=True)
     
-    # Check if user is approved
     if request.user.status != 'approved':
         messages.error(request, 'Your account must be approved before you can book vehicles.')
         return redirect('vehicle_detail', pk=vehicle.id)
@@ -24,16 +24,13 @@ def create_booking(request, vehicle_id):
         end_date = request.POST.get('end_date')
         special_requests = request.POST.get('special_requests', '')
         
-        # Validate dates
         if not start_date or not end_date:
             messages.error(request, 'Please select both start and end dates.')
             return redirect('create_booking', vehicle_id=vehicle.id)
         
-        # Convert to date objects
         start = datetime.strptime(start_date, '%Y-%m-%d').date()
         end = datetime.strptime(end_date, '%Y-%m-%d').date()
         
-        # Check if dates are valid
         if start < datetime.now().date():
             messages.error(request, 'Start date cannot be in the past.')
             return redirect('create_booking', vehicle_id=vehicle.id)
@@ -42,7 +39,6 @@ def create_booking(request, vehicle_id):
             messages.error(request, 'End date must be after start date.')
             return redirect('create_booking', vehicle_id=vehicle.id)
         
-        # Check if vehicle is available
         conflicting_bookings = Booking.objects.filter(
             vehicle=vehicle,
             status__in=['pending', 'confirmed'],
@@ -54,11 +50,9 @@ def create_booking(request, vehicle_id):
             messages.error(request, 'Vehicle is not available for the selected dates.')
             return redirect('create_booking', vehicle_id=vehicle.id)
         
-        # Calculate total days and price
         total_days = (end - start).days
         total_price = total_days * vehicle.price_per_day
         
-        # Create booking
         booking = Booking.objects.create(
             user=request.user,
             vehicle=vehicle,
@@ -71,7 +65,7 @@ def create_booking(request, vehicle_id):
             payment_status='pending'
         )
         
-        messages.success(request, f'Booking created successfully! Total: ${total_price} for {total_days} days.')
+        messages.success(request, f'Booking created successfully! Total: KSh {total_price} for {total_days} days.')
         messages.info(request, 'Please complete the payment to confirm your booking.')
         return redirect('submit_payment', booking_id=booking.id)
     
@@ -104,14 +98,19 @@ def submit_payment(request, booking_id):
     return render(request, 'bookings/submit_payment.html', {'booking': booking})
 
 @login_required
-@user_passes_test(is_admin)
 def pending_payments(request):
+    if not is_admin(request.user):
+        messages.error(request, 'Access denied.')
+        return redirect('home')
     pending_bookings = Booking.objects.filter(payment_status='payment_sent')
     return render(request, 'bookings/pending_payments.html', {'pending_bookings': pending_bookings})
 
 @login_required
-@user_passes_test(is_admin)
 def verify_payment(request, booking_id):
+    if not is_admin(request.user):
+        messages.error(request, 'Access denied.')
+        return redirect('home')
+    
     booking = get_object_or_404(Booking, id=booking_id)
     
     if request.method == 'POST':
@@ -146,7 +145,6 @@ def my_bookings(request):
 def booking_detail(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
     
-    # Ensure user can only view their own bookings
     if booking.user != request.user and not request.user.is_staff:
         messages.error(request, 'You do not have permission to view this booking.')
         return redirect('my_bookings')

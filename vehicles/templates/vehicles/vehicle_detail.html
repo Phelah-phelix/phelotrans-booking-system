@@ -49,7 +49,9 @@
                     <h5>Description</h5>
                     <p class="text-muted">{{ vehicle.description }}</p>
                 </div>
-                
+                <div>
+                    <p><strong>Available Units:</strong> {{ vehicle.quantity_available }}</p>
+                </div>
                 {% if vehicle.features %}
                 <div class="mb-4">
                     <h5>Features</h5>

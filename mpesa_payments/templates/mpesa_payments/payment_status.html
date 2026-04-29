@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card-modern p-4 text-center">
+                <i class="fas fa-clock fa-3x text-warning mb-3"></i>
+                <h2>Payment Initiated</h2>
+                <p>Booking #{{ booking.id }}</p>
+                <p>Amount: KSh {{ booking.total_price }}</p>
+                <a href="{% url 'booking_detail' booking.id %}" class="btn-gradient">View Booking</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
