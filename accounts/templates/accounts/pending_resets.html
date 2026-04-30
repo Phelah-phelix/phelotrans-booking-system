@@ -9,9 +9,10 @@
             <h3 class="mb-0">
                 <i class="fas fa-key me-2"></i>Pending Password Reset Requests
             </h3>
+            <p class="mb-0 mt-2">Approve requests to allow users to reset their passwords</p>
         </div>
         <div class="card-body">
-            {% if users %}
+            {% if pending_requests %}
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
@@ -19,21 +20,19 @@
                                 <th>User</th>
                                 <th>Email</th>
                                 <th>Request Date</th>
-                                <th>Reset Token</th>
+                                <th>Request Token</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for user in users %}
+                            {% for req in pending_requests %}
                             <tr>
-                                <td>{{ user.username }}</td>
-                                <td>{{ user.email }}</td>
-                                <td>{{ user.updated_at|date:"M d, Y H:i" }}</td>
+                                <td>{{ req.user.username }}</td>
+                                <td>{{ req.user.email }}</td>
+                                <td>{{ req.user.updated_at|date:"M d, Y H:i" }}</td>
+                                <td><code class="small">{{ req.token_preview }}</code></td>
                                 <td>
-                                    <code>{{ user.admin_message|cut:"RESET_TOKEN:"|truncatechars:20 }}</code>
-                                </td>
-                                <td>
-                                    <a href="{% url 'approve_password_reset' user.id %}" class="btn btn-sm btn-primary">
+                                    <a href="{% url 'approve_password_reset' req.user.id %}" class="btn btn-sm btn-primary">
                                         <i class="fas fa-check me-1"></i>Approve
                                     </a>
                                 </td>

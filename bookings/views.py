@@ -122,6 +122,8 @@ def verify_payment(request, booking_id):
             booking.status = 'confirmed'
             booking.payment_date = timezone.now()
             booking.admin_notes = admin_notes
+            booking.vehicle.quantity_available -= 1
+            booking.vehicle.save()
             booking.save()
             messages.success(request, f'Payment for booking #{booking.id} has been verified and confirmed!')
             

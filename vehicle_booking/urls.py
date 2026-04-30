@@ -22,12 +22,18 @@ urlpatterns = [
     path('forgot-password/', accounts_views.forgot_password, name='forgot_password'),
     path('pending-resets/', accounts_views.pending_password_resets, name='pending_password_resets'),
     path('approve-reset/<int:user_id>/', accounts_views.approve_password_reset, name='approve_password_reset'),
-    path('generate-reset/<str:email>/', accounts_views.generate_reset_link, name='generate_reset'),
-    path('reset-password/<uidb64>/<token>/', accounts_views.reset_password_confirm, name='reset_confirm'),
+    path('set-new-password/<str:token>/', accounts_views.set_new_password, name='set_new_password'),
+    
+    # API endpoints
+    path('api/dashboard-stats/', accounts_views.dashboard_stats, name='dashboard_stats'),
+    path('api/recent-users/', accounts_views.recent_users, name='recent_users'),
+    path('api/recent-bookings/', accounts_views.recent_bookings, name='recent_bookings'),
     path('api/recent-payments/', accounts_views.recent_payments, name='recent_payments'),
     path('api/pending-payments-count/', accounts_views.pending_payments_count, name='pending_payments_count'),
+    path('api/pending-resets-count/', accounts_views.pending_resets_count, name='pending_resets_count'),
+    path('api/customer-stats/', accounts_views.customer_stats, name='customer_stats'),
+    path('api/customer-bookings/', accounts_views.customer_bookings, name='customer_bookings'),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    path('api/pending-resets-count/', accounts_views.pending_resets_count, name='pending_resets_count'),

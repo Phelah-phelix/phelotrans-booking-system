@@ -4,6 +4,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.db.models import Q
 from .models import Vehicle, VehicleCategory
+from datetime import date
 
 class VehicleListView(ListView):
     model = Vehicle
@@ -13,8 +14,23 @@ class VehicleListView(ListView):
     ordering = ['-created_at']
     
     def get_queryset(self):
-        queryset = Vehicle.objects.filter(is_available=True).order_by('-created_at')
+        # Get today's date
+        today = date.today()
         
+        # Exclude vehicles that are booked/confirmed for current/future dates
+        from bookings.models import Booking
+        booked_vehicle_ids = Booking.objects.filter(
+            status='confirmed',
+            end_date__gte=today
+        ).values_list('vehicle_id', flat=True)
+        
+        # Start with available vehicles
+        queryset = Vehicle.objects.filter(
+            is_available=True, 
+            quantity_available__gt=0
+        ).exclude(id__in=booked_vehicle_ids).order_by('-created_at')
+        
+        # Search filter
         search_query = self.request.GET.get('search')
         if search_query:
             queryset = queryset.filter(
@@ -23,10 +39,12 @@ class VehicleListView(ListView):
                 Q(description__icontains=search_query)
             )
         
+        # Category filter
         category = self.request.GET.get('category')
         if category:
             queryset = queryset.filter(category__slug=category)
         
+        # Price filter
         min_price = self.request.GET.get('min_price')
         max_price = self.request.GET.get('max_price')
         if min_price:
@@ -34,10 +52,12 @@ class VehicleListView(ListView):
         if max_price:
             queryset = queryset.filter(price_per_day__lte=max_price)
         
+        # Transmission filter
         transmission = self.request.GET.get('transmission')
         if transmission:
             queryset = queryset.filter(transmission=transmission)
         
+        # Seats filter
         seats = self.request.GET.get('seats')
         if seats:
             queryset = queryset.filter(seats__gte=seats)

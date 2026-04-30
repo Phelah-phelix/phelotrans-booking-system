@@ -6,7 +6,7 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6 text-white" data-aos="fade-right">
-                <h1 class="display-3 fw-bold mb-4">Drive Your Dreams with AutoRent</h1>
+                <h1 class="display-3 fw-bold mb-4">Drive Your Dreams with phelotrans</h1>
                 <p class="lead mb-4">Experience luxury and comfort with our premium fleet of vehicles. Book your perfect ride today!</p>
                 {% if not user.is_authenticated %}
                 <div>
@@ -53,7 +53,7 @@
                                 Your account is approved! Start exploring our premium vehicles.
                             </div>
                             <div class="mt-4">
-                                <a href="#" class="btn-gradient me-2">
+                                <a href="% {url 'vehicle_list' %}" class="btn-gradient me-2">
                                     <i class="fas fa-search me-2"></i>Browse Vehicles
                                 </a>
                                 <a href="#" class="btn-outline-gradient">

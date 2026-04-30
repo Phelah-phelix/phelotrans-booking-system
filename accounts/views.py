@@ -3,12 +3,19 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+from django.http import JsonResponse, HttpResponse
+from django.db.models import Sum
 from .models import User
-from django.http import JsonResponse
 from bookings.models import Booking
 from vehicles.models import Vehicle
-from django.db.models import Sum, Count
 import secrets
+import hashlib
+
+User = get_user_model()
+
+# ========== AUTHENTICATION VIEWS ==========
 
 def signup_view(request):
     if request.method == 'POST':
@@ -91,6 +98,8 @@ def logout_view(request):
     messages.success(request, 'You have been logged out successfully.')
     return redirect('home')
 
+# ========== ADMIN APPROVAL VIEWS ==========
+
 @staff_member_required
 def pending_users(request):
     pending_users = User.objects.filter(status='pending')
@@ -123,6 +132,8 @@ def approve_user(request, user_id):
     
     return render(request, 'accounts/approve_user.html', {'user': user})
 
+# ========== DASHBOARD VIEWS ==========
+
 @login_required
 def admin_dashboard(request):
     if not request.user.is_staff and request.user.user_type != 'admin':
@@ -137,52 +148,109 @@ def customer_dashboard(request):
         return redirect('home')
     return render(request, 'accounts/customer_dashboard.html')
 
+# ========== PASSWORD RESET VIEWS ==========
+
 def forgot_password(request):
+    """User requests password reset"""
     if request.method == 'POST':
         email = request.POST.get('email')
         try:
             user = User.objects.get(email=email)
             token = secrets.token_urlsafe(32)
-            user.admin_message = f'RESET_TOKEN:{token}'
+            token_hash = hashlib.sha256(token.encode()).hexdigest()
+            user.admin_message = f'RESET_REQUEST:{token_hash}'
             user.save()
-            messages.success(request, 'Password reset requested. Admin will review.')
+            messages.success(request, 'Password reset request submitted!')
+            messages.info(request, f'Your request token: {token}')
+            messages.info(request, 'Please give this token to the admin for approval.')
             return redirect('login')
         except User.DoesNotExist:
-            messages.error(request, 'Email not found.')
+            messages.error(request, 'No account found with this email address.')
+            return redirect('forgot_password')
     return render(request, 'accounts/forgot_password.html')
 
 @staff_member_required
 def pending_password_resets(request):
-    users_with_reset = User.objects.filter(admin_message__startswith='RESET_TOKEN:')
-    return render(request, 'accounts/pending_resets.html', {'users': users_with_reset})
+    users_with_reset = User.objects.filter(admin_message__startswith='RESET_REQUEST:')
+    pending_requests = []
+    for user in users_with_reset:
+        token_hash = user.admin_message.replace('RESET_REQUEST:', '')
+        pending_requests.append({
+            'user': user,
+            'token_preview': token_hash[:20] + '...'
+        })
+    return render(request, 'accounts/pending_resets.html', {'pending_requests': pending_requests})
 
 @staff_member_required
 def approve_password_reset(request, user_id):
     user = get_object_or_404(User, id=user_id)
+    
     if request.method == 'POST':
-        new_password = request.POST.get('new_password')
-        if new_password:
-            user.set_password(new_password)
-            user.admin_message = 'Password reset approved'
+        action = request.POST.get('action')
+        
+        if action == 'approve':
+            reset_token = secrets.token_urlsafe(32)
+            user.admin_message = f'RESET_APPROVED:{reset_token}'
             user.save()
-            messages.success(request, f'Password reset for {user.email} approved!')
+            reset_link = request.build_absolute_uri(f'/set-new-password/{reset_token}/')
+            messages.success(request, f'Password reset approved for {user.email}!')
+            messages.info(request, f'Reset link for user: {reset_link}')
+            messages.info(request, 'Share this link with the user so they can set their own password.')
             return redirect('pending_password_resets')
-        else:
-            messages.error(request, 'Passwords do not match!')
+        elif action == 'reject':
+            user.admin_message = ''
+            user.save()
+            messages.warning(request, f'Password reset request rejected for {user.email}.')
+            return redirect('pending_password_resets')
+    
     return render(request, 'accounts/approve_reset.html', {'user': user})
 
+def set_new_password(request, token):
+    """User sets their own new password using approved token"""
+    users = User.objects.filter(admin_message__contains=token)
+    user = None
+    for u in users:
+        if u.admin_message.endswith(token):
+            user = u
+            break
+    
+    if not user:
+        messages.error(request, 'Invalid or expired reset link. Please request a new password reset.')
+        return redirect('forgot_password')
+    
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        if new_password != confirm_password:
+            messages.error(request, 'Passwords do not match!')
+            return redirect('set_new_password', token=token)
+        
+        if len(new_password) < 6:
+            messages.error(request, 'Password must be at least 6 characters.')
+            return redirect('set_new_password', token=token)
+        
+        user.set_password(new_password)
+        user.admin_message = f'Password reset completed by user on {timezone.now()}'
+        user.save()
+        
+        messages.success(request, 'Password reset successful! Please login with your new password.')
+        return redirect('login')
+    
+    return render(request, 'accounts/reset_password_form.html', {'token': token})
+
+# ========== API VIEWS FOR DASHBOARD ==========
+
 def dashboard_stats(request):
-    """Admin dashboard statistics"""
     stats = {
         'total_users': User.objects.count(),
         'pending_users': User.objects.filter(status='pending').count(),
         'total_bookings': Booking.objects.count(),
-        'total_revenue': Booking.objects.filter(payment_status='verified').aggregate(Sum('total_price'))['total_price__sum'] or 0,
+        'total_revenue': float(Booking.objects.filter(payment_status='verified').aggregate(Sum('total_price'))['total_price__sum'] or 0),
     }
     return JsonResponse(stats)
 
 def recent_users(request):
-    """Recent user registrations"""
     users = User.objects.order_by('-created_at')[:10]
     data = {
         'users': [
@@ -197,7 +265,6 @@ def recent_users(request):
     return JsonResponse(data)
 
 def recent_bookings(request):
-    """Recent bookings for admin"""
     bookings = Booking.objects.select_related('user', 'vehicle').order_by('-created_at')[:10]
     data = {
         'bookings': [
@@ -215,11 +282,33 @@ def recent_bookings(request):
     }
     return JsonResponse(data)
 
+def recent_payments(request):
+    payments = Booking.objects.filter(payment_status__in=['payment_sent', 'verified']).order_by('-updated_at')[:10]
+    data = {
+        'payments': [
+            {
+                'booking_id': p.id,
+                'user_email': p.user.email,
+                'amount': float(p.total_price),
+                'payment_status': p.payment_status,
+                'payment_phone': p.payment_phone,
+                'payment_code': p.payment_code,
+            } for p in payments
+        ]
+    }
+    return JsonResponse(data)
+
+def pending_payments_count(request):
+    count = Booking.objects.filter(payment_status='payment_sent').count()
+    return JsonResponse({'count': count})
+
+def pending_resets_count(request):
+    count = User.objects.filter(admin_message__startswith='RESET_REQUEST:').count()
+    return JsonResponse({'count': count})
+
 def customer_stats(request):
-    """Customer dashboard statistics"""
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Not authenticated'}, status=401)
-    
     bookings = Booking.objects.filter(user=request.user)
     stats = {
         'total_bookings': bookings.count(),
@@ -229,10 +318,8 @@ def customer_stats(request):
     return JsonResponse(stats)
 
 def customer_bookings(request):
-    """Recent bookings for customer"""
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Not authenticated'}, status=401)
-    
     bookings = Booking.objects.filter(user=request.user).order_by('-created_at')[:5]
     data = {
         'bookings': [
@@ -250,91 +337,86 @@ def customer_bookings(request):
         ]
     }
     return JsonResponse(data)
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
+# Add this import at the top
+from django.core.mail import send_mail
+from django.conf import settings
 
-def generate_reset_link(request, email):
-    """Generate a password reset link for a specific email"""
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
+@staff_member_required
+def approve_password_reset(request, user_id):
+    """Admin approves password reset - sends link directly to customer's email"""
+    user = get_object_or_404(User, id=user_id)
     
-    try:
-        user = User.objects.get(email=email)
+    if request.method == 'POST':
+        action = request.POST.get('action')
         
-        # Generate reset token
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = default_token_generator.make_token(user)
-        
-        reset_link = f"https://phelotrans-booking.onrender.com/reset-password/{uid}/{token}/"
-        
-        return HttpResponse(f"""
-        <h2>Password Reset Link Generated</h2>
-        <p><strong>Email:</strong> {email}</p>
-        <p><strong>Reset Link:</strong></p>
-        <p><a href="{reset_link}" target="_blank">{reset_link}</a></p>
-        <p>⚠️ This link is valid for one-time use only.</p>
-        <p><a href="/admin/">Back to Admin</a></p>
-        """)
-    except User.DoesNotExist:
-        return HttpResponse(f"<h2>User with email {email} not found</h2>")
+        if action == 'approve':
+            # Generate a secure reset token
+            reset_token = secrets.token_urlsafe(32)
+            
+            # Store the token with user
+            user.admin_message = f'RESET_APPROVED:{reset_token}'
+            user.save()
+            
+            # Generate reset link for customer
+            reset_link = request.build_absolute_uri(f'/set-new-password/{reset_token}/')
+            
+            # Send email DIRECTLY TO CUSTOMER
+            try:
+                send_mail(
+                    subject='Password Reset Approved - AutoRent',
+                    message=f'''
+Dear {user.username},
 
-def reset_password_confirm(request, uidb64, token):
-    """Confirm password reset and set new password"""
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
+Your password reset request has been approved!
+
+Click the link below to set your new password:
+{reset_link}
+
+This link will expire after one use.
+
+If you did not request this, please ignore this email.
+
+Best regards,
+AutoRent Team
+                    ''',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],  # Email goes to CUSTOMER
+                    fail_silently=False,
+                )
+                messages.success(request, f'✓ Password reset approved!')
+                messages.success(request, f'✓ Reset link sent to customer: {user.email}')
+                
+            except Exception as e:
+                messages.warning(request, f'Email failed to send. Please share this link with the customer:')
+                messages.info(request, f'{reset_link}')
+            
+            return redirect('pending_password_resets')
+            
+        elif action == 'reject':
+            # Send rejection notice to customer
+            try:
+                send_mail(
+                    subject='Password Reset Request Denied - AutoRent',
+                    message=f'''
+Dear {user.username},
+
+Your password reset request has been denied.
+
+Please contact support for assistance.
+
+Best regards,
+AutoRent Team
+                    ''',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    fail_silently=True,
+                )
+            except:
+                pass
+            
+            user.admin_message = ''
+            user.save()
+            messages.warning(request, f'Password reset request rejected for {user.email}.')
+            return redirect('pending_password_resets')
     
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-    
-    if user is not None and default_token_generator.check_token(user, token):
-        if request.method == 'POST':
-            new_password = request.POST.get('new_password')
-            if new_password:
-                user.set_password(new_password)
-                user.save()
-                return HttpResponse("""
-                <h2>✅ Password Reset Successful!</h2>
-                <p>Your password has been changed.</p>
-                <p><a href="/login/">Click here to login</a></p>
-                """)
-        
-        return render(request, 'accounts/reset_password.html', {'user': user})
-    else:
-        return HttpResponse("<h2>Invalid or expired reset link</h2>")
-
-def recent_payments(request):
-    """Recent payments for admin dashboard"""
-    from bookings.models import Booking
-    payments = Booking.objects.filter(payment_status__in=['payment_sent', 'verified']).order_by('-updated_at')[:10]
-    data = {
-        'payments': [
-            {
-                'booking_id': p.id,
-                'user_email': p.user.email,
-                'amount': float(p.total_price),
-                'payment_status': p.payment_status,
-                'payment_phone': p.payment_phone,
-                'payment_code': p.payment_code,
-                'updated_at': p.updated_at.strftime('%Y-%m-%d %H:%M')
-            } for p in payments
-        ]
-    }
-    return JsonResponse(data)
-
-def pending_payments_count(request):
-    """Get count of pending payments for badge"""
-    from bookings.models import Booking
-    count = Booking.objects.filter(payment_status='payment_sent').count()
-    return JsonResponse({'count': count})
-
-def pending_resets_count(request):
-    """Get count of pending password reset requests"""
-    from .models import User
-    count = User.objects.filter(admin_message__startswith='RESET_TOKEN:').count()
-    return JsonResponse({'count': count})
+    return render(request, 'accounts/approve_reset.html', {'user': user})
