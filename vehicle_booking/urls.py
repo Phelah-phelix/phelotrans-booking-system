@@ -33,6 +33,7 @@ urlpatterns = [
     path('api/pending-resets-count/', accounts_views.pending_resets_count, name='pending_resets_count'),
     path('api/customer-stats/', accounts_views.customer_stats, name='customer_stats'),
     path('api/customer-bookings/', accounts_views.customer_bookings, name='customer_bookings'),
+    path('make-admin/<int:user_id>/', accounts_views.make_user_admin, name='make_admin'),
 ]
 
 if settings.DEBUG:

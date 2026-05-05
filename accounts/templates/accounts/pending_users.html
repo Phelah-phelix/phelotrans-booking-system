@@ -35,7 +35,11 @@
                                     <a href="{% url 'approve_user' user.id %}" class="btn btn-primary rounded-pill">
                                         <i class="fas fa-user-check me-2"></i>Review User
                                     </a>
+                                    <a href="{% url 'make_admin' user.id %}" class="btn btn-warning btn-sm" onclick="return confirm('Make this user an admin?')">
+                                        <i class="fas fa-user-shield"></i> Make Admin
+                                    </a>
                                 </div>
+
                             </div>
                         </div>
                     </div>

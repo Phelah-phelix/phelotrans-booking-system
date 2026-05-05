@@ -12,6 +12,8 @@ from bookings.models import Booking
 from vehicles.models import Vehicle
 import secrets
 import hashlib
+from django.core.mail import send_mail
+from django.conf import settings
 
 User = get_user_model()
 
@@ -338,9 +340,23 @@ def customer_bookings(request):
     }
     return JsonResponse(data)
 # Add this import at the top
-from django.core.mail import send_mail
-from django.conf import settings
 
+def make_user_admin(request, user_id):
+    from django.http import HttpResponse
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    
+    if not request.user.is_superuser:
+        return HttpResponse("Access denied. Superuser only.")
+    
+    user = User.objects.get(id=user_id)
+    user.is_staff = True
+    user.is_superuser = True
+    user.user_type = 'admin'
+    user.status = 'approved'
+    user.save()
+    
+    return HttpResponse(f"✅ {user.email} is now an admin! <a href='/admin-dashboard/'>Go back</a>")
 @staff_member_required
 def approve_password_reset(request, user_id):
     """Admin approves password reset - sends link directly to customer's email"""
