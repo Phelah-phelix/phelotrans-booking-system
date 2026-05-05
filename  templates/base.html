@@ -143,5 +143,40 @@
     <script src="{% static 'js/main.js' %}"></script>
     
     {% block extra_js %}{% endblock %}
+    <!-- Floating Logout Button for Mobile -->
+{% if user.is_authenticated %}
+<style>
+    @media (max-width: 768px) {
+        .fab-logout {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f72585 0%, #b5179e 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .fab-logout:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        }
+        .fab-logout i {
+            font-size: 24px;
+        }
+    }
+</style>
+<a href="{% url 'logout' %}" class="fab-logout" onclick="return confirm('Are you sure you want to logout?')">
+    <i class="fas fa-sign-out-alt"></i>
+</a>
+{% endif %}
 </body>
 </html>
